@@ -1528,16 +1528,6 @@
         document.getElementById('btnTopPopoutView').classList.add('hidden');
       }
 
-      // Render initial Kick-style messages matching the user's screenshot so they immediately see the exact UI & BiDi fix
-      DEMO_MESSAGES.forEach((m, i) => {
-        handleIncomingKickMessage({
-          id: 'welcome_demo_' + i,
-          content: m.content,
-          reply_to: m.reply_to || null,
-          created_at: new Date().toISOString(),
-          sender: { username: m.username, identity: { color: m.color, badges: m.badges } }
-        }, true);
-      });
 
       // Popout Buttons
       document.getElementById('btnPopoutWindow').addEventListener('click', openRealPopoutWindow);
