@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kick Chat Reader — خواننده چت کیک بدون فیلترشکن</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    if (typeof window.tailwind !== 'undefined') {
+      window.tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Vazirmatn', 'Inter', 'sans-serif'],
+              mono: ['Inter', 'monospace']
+            },
+            colors: {
+              kick: {
+                DEFAULT: '#53FC18',
+                dark: '#3bc40b',
+                bg: '#0B0E0F',
+                card: '#14171A',
+                border: '#24292E'
+              }
+            }
+          }
+        }
+      };
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Vazirmatn', Tahoma, sans-serif;
+      background-color: #0B0E0F;
+      color: #F3F4F6;
+      overflow-x: hidden;
+    }
+    .hidden { display: none !important; }
+    body.obs-transparent {
+      background-color: rgba(11, 14, 15, 0.45) !important;
+    }
+    input, button {
+      font-family: 'Vazirmatn', 'Inter', sans-serif;
+    }
+    .text-kick { color: #53FC18; }
+    .bg-kick { background-color: #53FC18; color: #000; }
+    .border-kick { border-color: #53FC18; }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0B0E0F;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #24292E;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #53FC18;
+    }
+
+    /* Authentic Kick Chat Feed Styling (Exact match to Kick dark UI) */
+    #chatMessagesContainer {
+      background-color: #0B0E0F;
+      direction: ltr;
+      text-align: left;
+      font-family: 'Inter', 'Vazirmatn', sans-serif;
+    }
+    .kick-chat-line {
+      direction: ltr;
+      text-align: left;
+      padding: 5px 10px;
+      border-radius: 6px;
+      line-height: 1.55;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+      transition: background-color 0.12s ease;
+      position: relative;
+    }
+    .kick-chat-line:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .kick-chat-line.highlighted-msg {
+      background-color: rgba(83, 252, 24, 0.12);
+      border-left: 3px solid #53FC18;
+    }
+    .kick-reply-preview {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: #9CA3AF;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: ltr;
+      text-align: left;
+    }
+    .kick-badges-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      vertical-align: middle;
+      margin-right: 5px;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+    .kick-badge-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+    .kick-level-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      line-height: 1;
+      color: #071A0E;
+      background: #22DF80;
+      flex-shrink: 0;
+    }
+    .kick-level-pill.pink-pill {
+      background: #FF6AC1;
+      color: #1F0614;
+      border-radius: 8px 8px 10px 10px;
+    }
+    .kick-level-pill.cyan-shield {
+      background: #1CE5E5;
+      color: #041F24;
+      clip-path: polygon(0% 0%, 100% 0%, 100% 72%, 50% 100%, 0% 72%);
+      height: 21px;
+      border-radius: 3px;
+    }
+    .kick-username {
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      unicode-bidi: isolate;
+      direction: ltr;
+      display: inline;
+      vertical-align: middle;
+    }
+    .kick-colon {
+      color: #FFFFFF;
+      font-weight: 700;
+      margin-right: 5px;
+      unicode-bidi: isolate;
+      direction: ltr;
+      display: inline;
+      vertical-align: middle;
+    }
+    /* BiDi-safe message body: preserves exact punctuation order in both Finglish/English and Persian */
+    .kick-msg-text {
+      color: #F3F4F6;
+      font-weight: 500;
+      vertical-align: middle;
+      unicode-bidi: isolate;
+    }
+    .kick-msg-text.rtl-seg {
+      direction: rtl;
+      unicode-bidi: isolate;
+      font-family: 'Vazirmatn', 'Inter', sans-serif;
+    }
+    .kick-msg-text.ltr-seg {
+      direction: ltr;
+      unicode-bidi: isolate;
+      font-family: 'Inter', 'Vazirmatn', sans-serif;
+    }
+    .kick-emote-img {
+      display: inline-block;
+      height: 28px;
+      width: auto;
+      min-width: 24px;
+      vertical-align: middle;
+      margin: -4px 2px;
+      object-fit: contain;
+    }
+    /* Popout Dock Mode (when user activates Popout View inside page) */
+    body.popout-view-active #appHeader,
+    body.popout-view-active #controlSidebar {
+      display: none !important;
+    }
+    body.popout-view-active main {
+      max-width: 480px !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      display: block !important;
+    }
+    body.popout-view-active #chatColumn {
+      height: 100vh !important;
+      border-radius: 0 !important;
+      border-top: none !important;
+      border-bottom: none !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-kick selection:text-black">
+
+  <!-- Top Header -->
+  <header id="appHeader" class="bg-[#14171A] border-b border-[#24292E] px-4 py-3 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-kick/15 border border-kick/40 flex items-center justify-center shadow-sm shadow-kick/10">
+          <span class="text-kick font-extrabold text-xl tracking-tighter font-mono">K</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg text-white">چت‌خوان مستقیم KICK (طرح اصلی کیک + پاپ‌آوت)</h1>
+            <span class="text-[11px] bg-kick/15 text-kick border border-kick/30 px-2 py-0.5 rounded-full font-medium">بدون فیلترشکن</span>
+          </div>
+          <p class="text-xs text-gray-400">نمایش دقیق بج‌ها، ایموت‌های تصویری، اصلاح کامل علائم نگارشی و قابلیت Popout</p>
+        </div>
+      </div>
+
+      <!-- Connection Status Badge & Quick Actions -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#1D2226] border border-[#2C333A] text-xs font-medium text-gray-300">
+          <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
+          <span id="statusText">آماده اتصال</span>
+        </div>
+
+        <button id="btnPopoutWindow" type="button" class="px-3 py-1.5 rounded-xl bg-kick hover:bg-kick-dark text-black font-bold text-xs transition flex items-center gap-1.5 shadow-sm shadow-kick/20" title="باز کردن چت در پنجره پاپ‌آوت مستقل یا نمای خالص کیک">
+          <span>🗗</span>
+          <span>پاپ‌آوت چت (Popout)</span>
+        </button>
+
+        <button id="btnSimToggle" type="button" class="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-xs font-medium transition flex items-center gap-1.5">
+          <span>⚡</span>
+          <span id="simBtnLabel">شبیه‌ساز چت زنده</span>
+        </button>
+
+        <button id="btnObsMode" type="button" class="px-3 py-1.5 rounded-xl bg-[#1D2226] hover:bg-[#262C31] text-gray-300 border border-[#2C333A] text-xs font-medium transition" title="حالت خلوت و شفاف برای OBS یا استریم">
+          🎥 حالت OBS
+        </button>
+
+        <button id="btnOpenSettings" type="button" class="px-3 py-1.5 rounded-xl bg-[#1D2226] hover:bg-[#262C31] text-gray-300 border border-[#2C333A] text-xs font-medium transition flex items-center gap-1">
+          <span>⚙️</span>
+          <span>تنظیمات و راهنما</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Right/Sidebar Control Panel -->
+    <aside id="controlSidebar" class="lg:col-span-4 flex flex-col gap-4">
+      <!-- Channel Connection Card -->
+      <section class="bg-[#14171A] border border-[#24292E] rounded-2xl p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-sm text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-kick"></span>
+            اتصال به چنل کیک
+          </h2>
+          <span id="activeChannelTag" class="text-xs font-mono text-kick hidden"></span>
+        </div>
+
+        <!-- Tabs: Username vs Chatroom ID -->
+        <div class="grid grid-cols-2 gap-1 p-1 bg-[#0B0E0F] rounded-xl border border-[#24292E] mb-3 text-xs">
+          <button id="tabModeSlug" type="button" class="py-1.5 px-2 rounded-lg font-medium bg-[#1D2226] text-kick shadow transition">
+            با نام کانال (پروکسی خودکار)
+          </button>
+          <button id="tabModeId" type="button" class="py-1.5 px-2 rounded-lg font-medium text-gray-400 hover:text-white transition">
+            با Chatroom ID (۱۰۰٪ مستقیم)
+          </button>
+        </div>
+
+        <!-- Mode 1: Channel Slug Input -->
+        <div id="slugInputBox" class="space-y-2.5">
+          <label for="channelSlugInput" class="block text-xs text-gray-300">نام چنل (Username) در کیک را وارد کنید:</label>
+          <div class="flex gap-2">
+            <input id="channelSlugInput" type="text" dir="ltr" placeholder="e.g. xqc, trainwreckstv"
+              class="flex-1 bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-500" />
+          </div>
+          <p class="text-[11px] text-gray-400 leading-relaxed">
+            برنامه به طور خودکار از <strong>۷ مسیر ضدتحریم (شامل Jina Reader و پروکسی‌های CORS)</strong> کد چت‌روم را پیدا کرده و مستقیم به وب‌سوکت Pusher وصل می‌شود.
+          </p>
+        </div>
+
+        <!-- Mode 2: Direct Chatroom ID Input -->
+        <div id="idInputBox" class="space-y-2.5 hidden">
+          <label for="chatroomIdInput" class="block text-xs text-gray-300">کد عددی Chatroom ID (یا متن کپی‌شده صفحه API):</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input id="chatroomIdInput" type="text" dir="ltr" placeholder="مثلاً 668 یا متن JSON"
+              class="sm:col-span-2 bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-sm text-white font-mono placeholder-gray-500" />
+            <input id="customLabelInput" type="text" dir="ltr" placeholder="نام کانال"
+              class="bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-gray-500" />
+          </div>
+          <p class="text-[11px] text-emerald-400/90 leading-relaxed">
+            💡 در این حالت <strong>هیچ درخواستی به سرور کیک ارسال نمی‌شود</strong> و ۱۰۰٪ مستقیم به سرور جهانی <span class="font-mono">ws-us2.pusher.com</span> وصل می‌شوید.
+          </p>
+        </div>
+
+        <!-- Connect / Disconnect Buttons -->
+        <div class="flex gap-2 mt-4">
+          <button id="btnConnect" type="button" class="flex-1 bg-kick hover:bg-kick-dark text-black font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-md shadow-kick/10 flex items-center justify-center gap-2">
+            <span>🔌</span>
+            <span id="btnConnectText">اتصال به چت زنده</span>
+          </button>
+          <button id="btnDisconnect" type="button" class="px-3.5 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-medium transition hidden">
+            قطع اتصال
+          </button>
+        </div>
+
+        <!-- Popout Options Bar -->
+        <div class="grid grid-cols-2 gap-2 mt-2.5">
+          <button id="btnInlinePopoutMode" type="button" class="py-2 px-3 rounded-xl bg-[#1D2226] hover:bg-[#282F36] border border-[#2C333A] text-xs text-gray-200 font-medium transition flex items-center justify-center gap-1.5">
+            <span>📱</span>
+            <span>نمای تمام‌صفحه پاپ‌آوت</span>
+          </button>
+          <button id="btnDownloadPopoutHtml" type="button" class="py-2 px-3 rounded-xl bg-[#1D2226] hover:bg-[#282F36] border border-[#2C333A] text-xs text-kick font-medium transition flex items-center justify-center gap-1.5" title="دانلود فایل پاپ‌آوت برای باز کردن در مرورگر یا OBS">
+            <span>📥</span>
+            <span>فایل مستقل پاپ‌آوت</span>
+          </button>
+        </div>
+
+        <!-- Manual ID Extractor Helper Box -->
+        <div id="manualIdHelperBox" class="hidden mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-xs space-y-2">
+          <div class="font-bold text-amber-300 flex items-center justify-between">
+            <span>🔑 راهنمای ۱۰ ثانیه‌ای دریافت کد کانال شما:</span>
+            <button id="btnCloseHelper" type="button" class="text-gray-400 hover:text-white">✕</button>
+          </div>
+          <p class="text-[11px] text-gray-300 leading-relaxed">
+            فایروال کلودفلر کیک دسترسی پروکسی‌های عمومی به کانال <span id="blockedSlugName" class="font-mono text-kick font-bold"></span> را مسدود کرد. برای اتصال دائمی و بدون فیلترشکن:
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <a id="jinaHelperLink" href="https://r.jina.ai/https://kick.com/api/v2/channels/xqc" target="_blank" rel="noopener noreferrer"
+              class="px-2.5 py-1.5 rounded-lg bg-amber-400 text-black font-bold text-[11px] inline-flex items-center gap-1">
+              ۱. باز کردن لینک اطلاعات کانال (بدون فیلتر) ↗
+            </a>
+          </div>
+          <p class="text-[11px] text-gray-400">
+            ۲. متن باز شده (یا عدد روبروی <span class="font-mono text-white">"chatroom":{"id":...</span>) را کپی کنید و در کادر زیر پیست کنید:
+          </p>
+          <div class="flex gap-1.5">
+            <input id="pasteJsonExtractorInput" type="text" dir="ltr" placeholder="Paste JSON or chatroom id here..."
+              class="flex-1 bg-[#0B0E0F] border border-amber-500/40 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono" />
+            <button id="btnExtractAndConnect" type="button" class="px-3 py-1.5 rounded-lg bg-kick text-black font-bold text-xs shrink-0">
+              استخراج و اتصال
+            </button>
+          </div>
+        </div>
+
+        <!-- Preset & Saved Channels -->
+        <div class="mt-4 pt-3 border-t border-[#24292E]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-gray-300">کانال‌های آماده (اتصال فوری بدون استعلام):</span>
+            <button id="btnClearSaved" type="button" class="text-[11px] text-gray-400 hover:text-red-400 transition">پاکسازی کش</button>
+          </div>
+          <div id="savedChannelsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </section>
+
+      <!-- Live Statistics & Filter Controls -->
+      <section class="bg-[#14171A] border border-[#24292E] rounded-2xl p-4 shadow-lg space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-sm text-white">آمار زنده و فیلتر پیام‌ها</h2>
+          <span id="chatroomIdBadge" class="text-[11px] font-mono bg-[#0B0E0F] px-2 py-0.5 rounded-md text-gray-400 border border-[#24292E]">ID: ---</span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
+            <div id="statTotalMsgs" class="text-lg font-bold text-white font-mono">0</div>
+            <div class="text-[11px] text-gray-400">کل پیام‌ها</div>
+          </div>
+          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
+            <div id="statMsgsPerMin" class="text-lg font-bold text-kick font-mono">0</div>
+            <div class="text-[11px] text-gray-400">پیام / دقیقه</div>
+          </div>
+          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
+            <div id="statUniqueUsers" class="text-lg font-bold text-sky-400 font-mono">0</div>
+            <div class="text-[11px] text-gray-400">کاربران فعال</div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Input -->
+        <div class="space-y-2">
+          <label for="searchFilterInput" class="block text-xs text-gray-300">جستجو در چت یا فیلتر کاربر خاص:</label>
+          <input id="searchFilterInput" type="text" placeholder="جستجوی متن یا نام کاربری..."
+            class="w-full bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500" />
+        </div>
+
+        <!-- Highlight Keyword Input -->
+        <div class="space-y-2">
+          <label for="highlightInput" class="block text-xs text-gray-300">کلمات کلیدی مهم (هایلایت با رنگ سبز):</label>
+          <input id="highlightInput" type="text" placeholder="مثلاً اسم خودتان یا کلمه کلیدی (با کاما جدا کنید)"
+            class="w-full bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500" />
+        </div>
+
+        <!-- Quick Toggles -->
+        <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+          <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
+            <input id="chkShowTime" type="checkbox" class="accent-kick w-4 h-4 rounded" />
+            <span>نمایش زمان پیام</span>
+          </label>
+          <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
+            <input id="chkShowBadges" type="checkbox" checked class="accent-kick w-4 h-4 rounded" />
+            <span>نشان‌ها (Badges)</span>
+          </label>
+          <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
+            <input id="chkTtsEnabled" type="checkbox" class="accent-kick w-4 h-4 rounded" />
+            <span>خوانش صوتی (TTS)</span>
+          </label>
+          <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
+            <input id="chkSoundAlert" type="checkbox" class="accent-kick w-4 h-4 rounded" />
+            <span>بیپ پیام هایلایت</span>
+          </label>
+        </div>
+
+        <!-- Font Size Slider -->
+        <div class="space-y-1 pt-1">
+          <div class="flex justify-between text-xs text-gray-400">
+            <label for="fontSizeRange">اندازه فونت چت:</label>
+            <span id="fontSizeValue" class="font-mono text-gray-200">15px</span>
+          </div>
+          <input id="fontSizeRange" type="range" min="12" max="24" value="15" class="w-full accent-kick cursor-pointer" />
+        </div>
+      </section>
+    </aside>
+
+    <!-- Main Chat Feed Column (Styled like Authentic Kick Chat) -->
+    <section id="chatColumn" class="lg:col-span-8 flex flex-col bg-[#0B0E0F] border border-[#24292E] rounded-2xl shadow-2xl overflow-hidden h-[78vh] lg:h-[85vh]">
+
+      <!-- Kick-Style Chat Header Bar -->
+      <div class="px-3.5 py-2.5 bg-[#14171A] border-b border-[#24292E] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-kick" id="chatHeaderDot"></span>
+          <span class="text-xs sm:text-sm font-bold text-white tracking-tight" id="chatHeaderTitle">CHATROOM</span>
+          <span id="connectionClusterTag" class="text-[11px] font-mono bg-[#0B0E0F] text-gray-400 px-2 py-0.5 rounded border border-[#24292E]">ws-us2.pusher.com</span>
+        </div>
+
+        <!-- Quick Channel Switcher visible inside Popout Mode -->
+        <div id="popoutQuickBar" class="hidden flex items-center gap-1.5">
+          <input id="popoutQuickSlug" type="text" dir="ltr" placeholder="Channel name / ID..."
+            class="bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-lg px-2 py-1 text-xs text-white font-mono w-32" />
+          <button id="btnPopoutQuickConnect" type="button" class="px-2.5 py-1 rounded-lg bg-kick text-black font-bold text-xs">
+            اتصال
+          </button>
+          <button id="btnExitPopoutView" type="button" class="px-2.5 py-1 rounded-lg bg-[#24292E] hover:bg-[#32383F] text-white text-xs">
+            پنل کامل ✕
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button id="btnExitObs" type="button" class="hidden px-2.5 py-1 rounded-lg bg-kick text-black font-bold text-xs">
+            خروج از حالت OBS
+          </button>
+          <button id="btnTopPopoutView" type="button" class="px-2.5 py-1 rounded-lg bg-kick/15 hover:bg-kick/25 text-kick border border-kick/30 text-xs font-medium transition" title="تبدیل به نمای خالص پاپ‌آوت کیک">
+            🗗 نمای پاپ‌آوت
+          </button>
+          <button id="btnSendTestMsg" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-[#24292E] text-gray-300 border border-[#2C333A] text-xs transition" title="ارسال پیام نمونه با بج‌ها و ایموت‌های کیک">
+            ➕ پیام تست
+          </button>
+          <button id="btnPauseScroll" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-[#24292E] text-gray-300 border border-[#2C333A] text-xs transition">
+            ⏸️ توقف اسکرول
+          </button>
+          <button id="btnExportLogs" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-[#24292E] text-gray-300 border border-[#2C333A] text-xs transition" title="دانلود فایل TXT چت‌ها">
+            💾 ذخیره چت
+          </button>
+          <button id="btnClearChat" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-red-500/20 text-gray-300 hover:text-red-300 border border-[#2C333A] text-xs transition">
+            🗑️ پاک کردن
+          </button>
+        </div>
+      </div>
+
+      <!-- Pinned Message Banner -->
+      <div id="pinnedMessageBar" class="hidden bg-[#14171A] border-b border-kick/40 px-4 py-2.5 flex items-start justify-between gap-3" dir="ltr">
+        <div class="text-xs leading-relaxed text-left">
+          <div class="flex items-center gap-1.5 text-kick font-bold mb-0.5">
+            <span>📌 Pinned Message</span>
+            <span id="pinnedAuthor" class="font-mono underline"></span>
+          </div>
+          <p id="pinnedContent" class="text-white break-words"></p>
+        </div>
+        <button id="btnUnpin" type="button" class="text-xs text-gray-400 hover:text-white px-2 py-1 rounded bg-black/40">حذف پین ✕</button>
+      </div>
+
+      <!-- Live Waiting / Heartbeat Bar -->
+      <div id="liveHeartbeatBar" class="hidden bg-[#101417] border-b border-[#1F262C] px-4 py-1.5 flex items-center justify-between text-[11px] text-emerald-400">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-kick animate-ping"></span>
+          <span id="heartbeatText">متصل به وب‌سوکت کانال — آماده دریافت آنی پیام‌ها</span>
+        </div>
+        <span id="heartbeatTimer" class="font-mono text-[11px] text-gray-400">00:00</span>
+      </div>
+
+      <!-- Authentic Kick Chat Messages Container (LTR layout like Kick) -->
+      <div id="chatMessagesContainer" class="flex-1 overflow-y-auto px-2.5 py-2 space-y-0.5 custom-scrollbar" dir="ltr">
+        <!-- Empty / Welcome State -->
+        <div id="emptyStateBox" class="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400" dir="rtl">
+          <div class="w-16 h-16 rounded-2xl bg-kick/10 border border-kick/30 flex items-center justify-center text-3xl mb-4">
+            💬
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">آماده دریافت چت‌های KICK بدون فیلترشکن</h3>
+          <p class="text-xs max-w-md leading-relaxed mb-4">
+            نام کانال کیک را در پنل سمت راست وارد کنید و دکمه <span class="text-kick font-semibold">«اتصال به چت زنده»</span> را بزنید.
+          </p>
+        </div>
+      </div>
+
+      <!-- Scroll Paused Floating Banner -->
+      <div id="scrollResumeBanner" class="hidden bg-[#1D2226]/95 border-t border-kick/40 px-4 py-2 flex items-center justify-between text-xs text-gray-200">
+        <span>⏸️ اسکرول خودکار متوقف شده است</span>
+        <button id="btnResumeScrollNow" type="button" class="bg-kick text-black font-bold px-3 py-1 rounded-lg text-xs">پرش به آخرین پیام ↓</button>
+      </div>
+
+      <!-- Bottom Status / Log Bar -->
+      <div class="px-3.5 py-1.5 bg-[#14171A] border-t border-[#24292E] flex items-center justify-between text-[11px] text-gray-400">
+        <div id="systemLogLine" class="truncate">سیستم آماده است. ظاهر چت منطبق با کیک + اصلاح BiDi علائم نگارشی</div>
+        <div class="font-mono text-gray-500 shrink-0" id="pingIndicator">Ping: --</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings & Anti-Filter Guide Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#14171A] border border-[#2C333A] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between border-b border-[#24292E] pb-3">
+        <h3 class="font-bold text-base text-white flex items-center gap-2">
+          <span>⚙️</span>
+          <span>تنظیمات پیشرفته اتصال و راهنمای دور زدن تحریم/فیلتر</span>
+        </h3>
+        <button id="btnCloseSettings" type="button" class="text-gray-400 hover:text-white text-sm px-2.5 py-1 rounded-lg bg-[#1D2226]">بستن ✕</button>
+      </div>
+
+      <!-- Pusher Config -->
+      <div class="space-y-3">
+        <h4 class="text-xs font-bold text-kick">۱. تنظیمات سرور WebSocket پوشر (Pusher) با قابلیت ترمیم خودکار</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          کیک تمام چت‌های زنده خود را از طریق شبکه Pusher ارسال می‌کند. این برنامه در صورت رد شدن یک کلید، به طور خودکار کلیدهای جایگزین کیک را تست می‌کند:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label for="pusherKeyInput" class="block text-[11px] text-gray-300 mb-1">Pusher App Key:</label>
+            <input id="pusherKeyInput" type="text" dir="ltr" value="32cbd69e4b950bf97679"
+              class="w-full bg-[#0B0E0F] border border-[#2C333A] rounded-xl px-3 py-2 text-xs text-white font-mono" />
+          </div>
+          <div>
+            <label for="pusherClusterInput" class="block text-[11px] text-gray-300 mb-1">Cluster:</label>
+            <input id="pusherClusterInput" type="text" dir="ltr" value="us2"
+              class="w-full bg-[#0B0E0F] border border-[#2C333A] rounded-xl px-3 py-2 text-xs text-white font-mono" />
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button id="btnPresetKey1" type="button" class="text-[11px] px-2.5 py-1 rounded-lg bg-[#1D2226] hover:bg-[#282F36] text-gray-300 border border-[#2C333A]">
+            کلید اصلی (32cbd69e...)
+          </button>
+          <button id="btnPresetKey2" type="button" class="text-[11px] px-2.5 py-1 rounded-lg bg-[#1D2226] hover:bg-[#282F36] text-gray-300 border border-[#2C333A]">
+            کلید جایگزین (34bf7a0f...)
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Proxy / Cloudflare Worker -->
+      <div class="space-y-3 pt-3 border-t border-[#24292E]">
+        <h4 class="text-xs font-bold text-sky-400">۲. آدرس پروکسی دلخواه (اختیاری - برای تبدیل نام کانال به ID)</h4>
+        <input id="customProxyInput" type="text" dir="ltr" placeholder="https://your-worker.workers.dev/?url="
+          class="w-full bg-[#0B0E0F] border border-[#2C333A] rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-gray-500" />
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btnSaveSettings" type="button" class="bg-kick hover:bg-kick-dark text-black font-bold px-5 py-2 rounded-xl text-xs transition">
+          ذخیره تنظیمات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="fixed bottom-4 left-4 z-50 hidden bg-[#191D21] border border-kick/50 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs flex items-center gap-2">
+    <span class="text-kick">✔</span>
+    <span id="toastText"></span>
+  </div>
+
+  <script>
+    // --- Expanded Pre-Resolved Popular Channels Directory ---
+    const DEFAULT_SAVED_CHANNELS = [
+      { slug: 'xqc', chatroomId: 668, label: 'xQc' },
+      { slug: 'trainwreckstv', chatroomId: 4, label: 'Trainwreckstv' },
+      { slug: 'adinross', chatroomId: 96966, label: 'AdinRoss' },
+      { slug: 'westcol', chatroomId: 133518, label: 'WestCOL' },
+      { slug: 'nickmercs', chatroomId: 19953121, label: 'NICKMERCS' },
+      { slug: 'amouranth', chatroomId: 138305, label: 'Amouranth' },
+      { slug: 'roshtein', chatroomId: 4498, label: 'Roshtein' },
+      { slug: 'hikaru', chatroomId: 193007, label: 'GMHikaru' }
+    ];
+
+    const KNOWN_PUSHER_KEYS = [
+      { key: '32cbd69e4b950bf97679', cluster: 'us2' },
+      { key: '34bf7a0ff419a2a775b9', cluster: 'us2' },
+      { key: '32cbd69e4b950bf97679', cluster: 'us3' }
+    ];
+
+    // --- State ---
+    let ws = null;
+    let currentChannelSlug = '';
+    let currentChatroomId = null;
+    let channelSubBadges = {}; // months -> image src
+    let isAutoScroll = true;
+    let simInterval = null;
+    let heartbeatInterval = null;
+    let pingTimer = null;
+    let lastPingSentAt = 0;
+    let connectedSince = 0;
+    let messagesList = [];
+    let messageTimestamps = [];
+    let uniqueSenders = new Set();
+    let seenMessageIds = new Set();
+    let inputMode = 'slug';
+    let pusherAppKey = '32cbd69e4b950bf97679';
+    let pusherCluster = 'us2';
+    let keyAttemptIndex = 0;
+    let customProxyUrl = '';
+    let audioCtx = null;
+    let popoutWindowRef = null;
+
+    // --- Authentic Kick SVG Badges (Exact visual match to Kick screenshot) ---
+    function getKickBadgeSvg(badge, usernameSeed) {
+      const type = (badge && badge.type ? badge.type : '').toLowerCase();
+      const count = badge && badge.count ? Number(badge.count) : 0;
+
+      // 1. Level / Number Pill Badge (like 42, 44, 48 green circle, 27 pink triangle, 33 cyan shield in screenshot)
+      if (type === 'level' || type === 'chat_level' || badge.isLevelBadge) {
+        const lvl = badge.level || count || 42;
+        const styleVariant = badge.variant || (lvl < 30 ? 'pink-pill' : (lvl >= 30 && lvl < 40 ? 'cyan-shield' : ''));
+        return `<span class="kick-level-pill ${styleVariant}" title="Level ${lvl}">${lvl}</span>`;
+      }
+
+      // 2. OG Badge (Cyan pixel blocky OG icon from Kick screenshot)
+      if (type === 'og') {
+        return `<span class="kick-badge-item" title="OG">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <rect x="1" y="2" width="10" height="20" rx="2" fill="#00E5FF"/>
+            <rect x="4" y="6" width="4" height="12" fill="#0B0E0F"/>
+            <rect x="13" y="2" width="10" height="20" rx="2" fill="#00B8D4"/>
+            <path d="M16 6H20V9H16V15H20V12H18V10H22V19H14V6Z" fill="#0B0E0F"/>
+          </svg>
+        </span>`;
+      }
+
+      // 3. VIP / Broadcaster / Crown Badge (Gold crown inside dark rounded box from screenshot)
+      if (type === 'vip' || type === 'broadcaster' || type === 'host') {
+        const title = type === 'vip' ? 'VIP' : 'Broadcaster';
+        return `<span class="kick-badge-item" title="${title}">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <rect x="1" y="1" width="22" height="22" rx="4" fill="#14171A" stroke="#F59E0B" stroke-width="2"/>
+            <path d="M5 17L6.5 8.5L10 12L12 7L14 12L17.5 8.5L19 17H5Z" fill="#FBBF24"/>
+          </svg>
+        </span>`;
+      }
+
+      // 4. Founder Badge (Metallic Gold [1] badge from bottom row of screenshot)
+      if (type === 'founder') {
+        return `<span class="kick-badge-item" title="Founder">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#2A2111" stroke="#FCD34D" stroke-width="2"/>
+            <path d="M10.5 8L13 6.5V17.5H10.5V8Z" fill="#FDE68A"/>
+          </svg>
+        </span>`;
+      }
+
+      // 5. Moderator Badge (Kick green sword/shield)
+      if (type === 'moderator' || type === 'mod') {
+        return `<span class="kick-badge-item" title="Moderator">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#062E16" stroke="#53FC18" stroke-width="1.8"/>
+            <path d="M17.5 6.5L10 14L8 12L6.5 13.5L8.5 15.5L6.5 17.5L8 19L10 17L12 19L13.5 17.5L11.5 15.5L19 8L17.5 6.5Z" fill="#53FC18"/>
+          </svg>
+        </span>`;
+      }
+
+      // 6. Verified Badge (Kick green checkmark)
+      if (type === 'verified') {
+        return `<span class="kick-badge-item" title="Verified">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <circle cx="12" cy="12" r="10" fill="#53FC18"/>
+            <path d="M8.5 12.5L10.8 14.8L15.8 9.5" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>`;
+      }
+
+      // 7. Sub Gifter Badge
+      if (type === 'sub_gifter' || type.includes('gifter')) {
+        return `<span class="kick-badge-item" title="Sub Gifter">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#1E1B4B" stroke="#818CF8" stroke-width="1.8"/>
+            <path d="M7 11H17V18H7V11ZM6 8H18V11H6V8ZM12 8V18" stroke="#A5B4FC" stroke-width="1.8"/>
+          </svg>
+        </span>`;
+      }
+
+      // 8. Subscriber Badge (Uses channel custom sub badge image if available, otherwise cute anime/avatar badge like screenshot)
+      if (type === 'subscriber' || type === 'sub') {
+        if (badge.imageUrl) {
+          return `<span class="kick-badge-item" title="Subscriber"><img src="${badge.imageUrl}" class="w-5 h-5 rounded-full object-cover" alt="sub" /></span>`;
+        }
+        // Deterministic avatar style matching the anime character sub badges in the user's screenshot
+        const hash = String(usernameSeed || 'u').charCodeAt(0) % 3;
+        const hairColor = hash === 0 ? '#7C2D12' : (hash === 1 ? '#F97316' : '#1E293B');
+        const accentColor = hash === 0 ? '#EF4444' : (hash === 1 ? '#FACC15' : '#22C55E');
+        return `<span class="kick-badge-item" title="Subscriber (${count || 1}m)">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none">
+            <circle cx="12" cy="12" r="10" fill="${hairColor}" stroke="${accentColor}" stroke-width="1.5"/>
+            <circle cx="12" cy="13" r="6" fill="#FDE68A"/>
+            <circle cx="9.8" cy="12.5" r="1.2" fill="#111827"/>
+            <circle cx="14.2" cy="12.5" r="1.2" fill="#111827"/>
+            <path d="M9.5 16C10.5 17 13.5 17 14.5 16" stroke="#7C2D12" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M5 10C7 5 17 5 19 10" fill="${hairColor}"/>
+          </svg>
+        </span>`;
+      }
+
+      return '';
+    }
+
+    // Generate deterministic level pill badge for users so every message looks authentic like Kick chat
+    function computeUserLevelBadge(username, existingBadges) {
+      const hasLevel = (existingBadges || []).some(b => b.type === 'level' || b.isLevelBadge);
+      if (hasLevel) return null;
+      let sum = 0;
+      const str = String(username || 'user');
+      for (let i = 0; i < str.length; i++) {
+        sum = (sum * 31 + str.charCodeAt(i)) % 1000;
+      }
+      const lvl = 22 + (sum % 29); // 22..50 like screenshot (27, 33, 42, 44, 47, 48)
+      let variant = '';
+      if (lvl < 30) variant = 'pink-pill';
+      else if (lvl < 38) variant = 'cyan-shield';
+      return { type: 'level', isLevelBadge: true, level: lvl, variant };
+    }
+
+    // --- BiDi-Safe Text & Emote Parser (Fixes Punctuation Scrambling 100%) ---
+    const PERSIAN_CHAR_REGEX = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+    function escapeHtmlStr(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderEmoteImgHtml(emoteId, emoteName) {
+      const safeName = escapeHtmlStr(emoteName);
+      // Primary: wsrv.nl global CDN image proxy (not filtered in Iran!)
+      // Fallback 1: direct files.kick.com
+      const proxySrc = `https://wsrv.nl/?url=https://files.kick.com/emotes/${encodeURIComponent(emoteId)}/fullsize`;
+      const directSrc = `https://files.kick.com/emotes/${encodeURIComponent(emoteId)}/fullsize`;
+      return `<img src="${proxySrc}" data-fallback="${directSrc}" alt="${safeName}" title="${safeName}" class="kick-emote-img" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');}else{this.outerHTML='<span class=\\'text-kick font-mono text-xs px-1\\'>['+this.alt+']</span>';}" />`;
+    }
+
+    function formatKickMessageContent(rawContent) {
+      const str = String(rawContent || '');
+      // Detect whether the text is primarily Persian/Arabic or LTR (English/Finglish)
+      const isPersianMsg = PERSIAN_CHAR_REGEX.test(str);
+      const dirClass = isPersianMsg ? 'rtl-seg' : 'ltr-seg';
+      const dirAttr = isPersianMsg ? 'rtl' : 'ltr';
+
+      // Split by [emote:ID:NAME] tokens so text segments get wrapped in isolated BiDi spans
+      const tokenRegex = /\[emote:(\d+):([^\]]+)\]/g;
+      let lastIndex = 0;
+      let match;
+      let partsHtml = '';
+
+      while ((match = tokenRegex.exec(str)) !== null) {
+        if (match.index > lastIndex) {
+          const textSeg = str.slice(lastIndex, match.index);
+          partsHtml += `<bdi dir="${dirAttr}" class="kick-msg-text ${dirClass}">${escapeHtmlStr(textSeg)}</bdi>`;
+        }
+        partsHtml += renderEmoteImgHtml(match[1], match[2]);
+        lastIndex = tokenRegex.lastIndex;
+      }
+
+      if (lastIndex < str.length) {
+        const remaining = str.slice(lastIndex);
+        partsHtml += `<bdi dir="${dirAttr}" class="kick-msg-text ${dirClass}">${escapeHtmlStr(remaining)}</bdi>`;
+      }
+
+      return partsHtml;
+    }
+
+    // --- Storage Helpers ---
+    function loadSavedChannels() {
+      try {
+        const raw = localStorage.getItem('kick_saved_channels_v2');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [...DEFAULT_SAVED_CHANNELS];
+    }
+
+    function saveChannelToCache(slug, chatroomId, label) {
+      const list = loadSavedChannels();
+      const cleanSlug = (slug || `room_${chatroomId}`).toLowerCase().trim();
+      const existingIdx = list.findIndex(item => Number(item.chatroomId) === Number(chatroomId) || item.slug === cleanSlug);
+      const entry = {
+        slug: cleanSlug,
+        chatroomId: Number(chatroomId),
+        label: label || slug || `#${chatroomId}`
+      };
+      if (existingIdx >= 0) {
+        list[existingIdx] = entry;
+      } else {
+        list.unshift(entry);
+      }
+      try {
+        localStorage.setItem('kick_saved_channels_v2', JSON.stringify(list.slice(0, 25)));
+      } catch (e) {}
+      renderSavedChannels();
+    }
+
+    // --- UI Helpers ---
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const txt = document.getElementById('toastText');
+      txt.textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        box.classList.add('hidden');
+      }, 3500);
+    }
+
+    function setLog(text) {
+      const el = document.getElementById('systemLogLine');
+      if (el) el.textContent = text;
+    }
+
+    function setConnectionStatus(state, text) {
+      const dot = document.getElementById('statusDot');
+      const label = document.getElementById('statusText');
+      const btnDisconnect = document.getElementById('btnDisconnect');
+      const hbBar = document.getElementById('liveHeartbeatBar');
+      label.textContent = text;
+      dot.className = 'w-2.5 h-2.5 rounded-full ';
+      if (state === 'connected') {
+        dot.className += 'bg-kick animate-pulse';
+        btnDisconnect.classList.remove('hidden');
+        hbBar.classList.remove('hidden');
+      } else if (state === 'connecting') {
+        dot.className += 'bg-amber-400 animate-ping';
+        btnDisconnect.classList.remove('hidden');
+        hbBar.classList.add('hidden');
+      } else if (state === 'simulating') {
+        dot.className += 'bg-purple-400 animate-pulse';
+        btnDisconnect.classList.add('hidden');
+        hbBar.classList.add('hidden');
+      } else if (state === 'error') {
+        dot.className += 'bg-red-500';
+        btnDisconnect.classList.add('hidden');
+        hbBar.classList.add('hidden');
+      } else {
+        dot.className += 'bg-gray-500';
+        btnDisconnect.classList.add('hidden');
+        hbBar.classList.add('hidden');
+      }
+    }
+
+    function playHighlightBeep() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.18);
+      } catch (e) {}
+    }
+
+    function speakMessage(username, content) {
+      try {
+        if (!('speechSynthesis' in window)) return;
+        const cleanText = content.replace(/\[emote:\d+:([^\]]+)\]/g, '$1');
+        const utter = new SpeechSynthesisUtterance(`${username}: ${cleanText}`);
+        utter.rate = 1.05;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    // --- Extract Chatroom ID from any raw string, JSON, or number ---
+    function extractChatroomIdFromRawText(rawText) {
+      if (!rawText) return null;
+      const trimmed = String(rawText).trim();
+      if (/^\d+$/.test(trimmed)) {
+        return Number(trimmed);
+      }
+      const chatroomMatch = trimmed.match(/"chatroom"\s*:\s*\{[^}]*?"id"\s*:\s*(\d+)/i);
+      if (chatroomMatch && chatroomMatch[1]) {
+        return Number(chatroomMatch[1]);
+      }
+      const cidMatch = trimmed.match(/"chatroom_id"\s*:\s*(\d+)/i);
+      if (cidMatch && cidMatch[1]) {
+        return Number(cidMatch[1]);
+      }
+      try {
+        const parsed = JSON.parse(trimmed);
+        const data = (parsed && typeof parsed.contents === 'string') ? JSON.parse(parsed.contents) : parsed;
+        if (data && data.chatroom && data.chatroom.id) return Number(data.chatroom.id);
+        if (data && data.id && data.slug) return Number(data.id);
+      } catch (e) {}
+      return null;
+    }
+
+    // --- Render Saved Channels Chips ---
+    function renderSavedChannels() {
+      const container = document.getElementById('savedChannelsList');
+      const list = loadSavedChannels();
+      container.innerHTML = '';
+      list.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-kick/15 hover:border-kick/40 border border-[#24292E] text-xs text-gray-200 font-mono transition flex items-center gap-1.5';
+        btn.innerHTML = `<span class="text-kick">#</span><span>${item.label}</span><span class="text-[10px] text-gray-500">(${item.chatroomId})</span>`;
+        btn.addEventListener('click', () => {
+          stopSimulator();
+          document.getElementById('manualIdHelperBox').classList.add('hidden');
+          document.getElementById('channelSlugInput').value = item.slug;
+          document.getElementById('chatroomIdInput').value = item.chatroomId;
+          document.getElementById('customLabelInput').value = item.label;
+          connectDirectlyToPusher(item.chatroomId, item.label);
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    // --- Resolve Channel Name (Slug) Without VPN via 7 Multi-Route Fallbacks ---
+    async function resolveChannelSlugToChatroomId(slug) {
+      const cleanSlug = slug.trim().toLowerCase().replace(/^@/, '').replace(/^https?:\/\/(www\.)?kick\.com\//i, '').split('/')[0];
+
+      if (/^\d+$/.test(cleanSlug)) {
+        return Number(cleanSlug);
+      }
+
+      const cached = loadSavedChannels().find(c => c.slug.toLowerCase() === cleanSlug || c.label.toLowerCase() === cleanSlug);
+      if (cached && cached.chatroomId) {
+        setLog(`کانال ${cleanSlug} از حافظه کش پیدا شد (Chatroom ID: ${cached.chatroomId})`);
+        return cached.chatroomId;
+      }
+
+      const v2Url = `https://kick.com/api/v2/channels/${encodeURIComponent(cleanSlug)}`;
+      const v1Url = `https://kick.com/api/v1/channels/${encodeURIComponent(cleanSlug)}`;
+      const chatroomEndpoint = `https://kick.com/api/v2/channels/${encodeURIComponent(cleanSlug)}/chatroom`;
+
+      const routes = [];
+      if (customProxyUrl) {
+        routes.push({ name: 'پروکسی اختصاصی', url: customProxyUrl + encodeURIComponent(v2Url) });
+      }
+      routes.push(
+        { name: 'Jina Reader v2 (ضد کلودفلر)', url: `https://r.jina.ai/${v2Url}` },
+        { name: 'Jina Reader Chatroom', url: `https://r.jina.ai/${chatroomEndpoint}` },
+        { name: 'AllOrigins Raw Proxy', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(v2Url)}` },
+        { name: 'AllOrigins JSON Proxy', url: `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}` },
+        { name: 'CodeTabs Proxy', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(v2Url)}` },
+        { name: 'CorsProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(v1Url)}` },
+        { name: 'اتصال مستقیم مرورگر', url: v2Url }
+      );
+
+      for (let i = 0; i < routes.length; i++) {
+        const route = routes[i];
+        setLog(`در حال یافتن کد کانال «${cleanSlug}» از مسیر ${i + 1}/${routes.length}: ${route.name}...`);
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 5500);
+          const resp = await fetch(route.url, {
+            signal: controller.signal,
+            headers: { 'Accept': 'application/json, text/plain, */*' }
+          });
+          clearTimeout(timer);
+          if (!resp.ok) continue;
+          const text = await resp.text();
+          const extractedId = extractChatroomIdFromRawText(text);
+          if (extractedId) {
+            return extractedId;
+          }
+        } catch (err) {}
+      }
+      throw new Error('CLOUDFLARE_OR_PROXY_BLOCKED');
+    }
+
+    // --- Fetch Recent History Messages ---
+    async function fetchRecentMessagesIfAvailable(chatroomId, channelSlug) {
+      const msgApi = `https://kick.com/api/v2/channels/${chatroomId}/messages`;
+      const historyRoutes = [
+        `https://r.jina.ai/${msgApi}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(msgApi)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(msgApi)}`
+      ];
+      for (const url of historyRoutes) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 4500);
+          const resp = await fetch(url, { signal: controller.signal });
+          clearTimeout(timer);
+          if (!resp.ok) continue;
+          const raw = await resp.text();
+          const jsonStart = raw.indexOf('{');
+          if (jsonStart === -1) continue;
+          const parsed = JSON.parse(raw.slice(jsonStart));
+          const arr = (parsed && parsed.data && Array.isArray(parsed.data.messages))
+            ? parsed.data.messages
+            : (Array.isArray(parsed.messages) ? parsed.messages : null);
+          if (arr && arr.length > 0) {
+            arr.slice(-25).reverse().forEach(m => handleIncomingKickMessage(m));
+            return;
+          }
+        } catch (e) {}
+      }
+    }
+
+    // --- Direct WebSocket Connection to Pusher ---
+    function connectDirectlyToPusher(chatroomId, channelLabel, isRetry = false) {
+      if (ws) {
+        try { ws.onclose = null; ws.close(); } catch (e) {}
+        ws = null;
+      }
+      clearInterval(heartbeatInterval);
+      clearInterval(pingTimer);
+
+      currentChatroomId = Number(chatroomId);
+      currentChannelSlug = channelLabel || `Room #${chatroomId}`;
+      saveChannelToCache(currentChannelSlug, currentChatroomId, currentChannelSlug);
+
+      if (!isRetry) {
+        messagesList = messagesList.filter(m => !m.isDemo);
+        renderMessagesFeed();
+      }
+
+      document.getElementById('chatroomIdBadge').textContent = `ID: ${currentChatroomId}`;
+      document.getElementById('chatHeaderTitle').textContent = `${currentChannelSlug.toUpperCase()} CHAT`;
+      document.getElementById('connectionClusterTag').textContent = `ws-${pusherCluster}.pusher.com`;
+      const activeTag = document.getElementById('activeChannelTag');
+      activeTag.textContent = `@${currentChannelSlug}`;
+      activeTag.classList.remove('hidden');
+
+      setConnectionStatus('connecting', `در حال اتصال به ${currentChannelSlug}...`);
+      const wsUrl = `wss://ws-${pusherCluster}.pusher.com/app/${pusherAppKey}?protocol=7&client=js&version=8.4.0-rc2&flash=false`;
+      setLog(`در حال اتصال به وب‌سوکت: ws-${pusherCluster}.pusher.com`);
+
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch (err) {
+        setConnectionStatus('error', 'خطا در ایجاد وب‌سوکت');
+        return;
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const packet = JSON.parse(event.data);
+
+          if (packet.event === 'pusher:connection_established') {
+            setConnectionStatus('connected', `متصل به ${currentChannelSlug}`);
+            document.getElementById('pingIndicator').textContent = 'Pusher: Connected';
+            connectedSince = Date.now();
+            startHeartbeatClock();
+
+            ['chatrooms.' + currentChatroomId + '.v2', 'chatrooms.' + currentChatroomId].forEach(ch => {
+              ws.send(JSON.stringify({
+                event: 'pusher:subscribe',
+                data: { auth: '', channel: ch }
+              }));
+            });
+
+            fetchRecentMessagesIfAvailable(currentChatroomId, currentChannelSlug);
+
+            pingTimer = setInterval(() => {
+              if (ws && ws.readyState === WebSocket.OPEN) {
+                lastPingSentAt = Date.now();
+                ws.send(JSON.stringify({ event: 'pusher:ping', data: {} }));
+              }
+            }, 25000);
+
+          } else if (packet.event === 'pusher:pong') {
+            if (lastPingSentAt > 0) {
+              const rtt = Date.now() - lastPingSentAt;
+              document.getElementById('pingIndicator').textContent = `Ping: ${rtt}ms`;
+            }
+
+          } else if (packet.event === 'pusher_internal:subscription_succeeded') {
+            setLog(`اشتراک زنده در چت‌روم ${currentChannelSlug} (${currentChatroomId}) فعال شد.`);
+            document.getElementById('heartbeatText').textContent = `متصل به ${currentChannelSlug} (ID: ${currentChatroomId}) — دریافت زنده پیام‌ها`;
+
+          } else if (packet.event === 'pusher:error') {
+            keyAttemptIndex = (keyAttemptIndex + 1) % KNOWN_PUSHER_KEYS.length;
+            const nextKeyObj = KNOWN_PUSHER_KEYS[keyAttemptIndex];
+            pusherAppKey = nextKeyObj.key;
+            pusherCluster = nextKeyObj.cluster;
+            document.getElementById('pusherKeyInput').value = pusherAppKey;
+            document.getElementById('pusherClusterInput').value = pusherCluster;
+            setTimeout(() => {
+              connectDirectlyToPusher(currentChatroomId, currentChannelSlug, true);
+            }, 600);
+
+          } else if (
+            packet.event === 'App\\Events\\ChatMessageEvent' ||
+            packet.event === 'App\\Events\\ChatMessageSentEvent' ||
+            (packet.event && packet.event.toLowerCase().includes('chatmessage'))
+          ) {
+            const payload = typeof packet.data === 'string' ? JSON.parse(packet.data) : packet.data;
+            handleIncomingKickMessage(payload);
+          }
+        } catch (err) {}
+      };
+
+      ws.onerror = () => {
+        setConnectionStatus('error', 'خطا در ارتباط WebSocket');
+      };
+
+      ws.onclose = (ev) => {
+        clearInterval(heartbeatInterval);
+        clearInterval(pingTimer);
+        if (ev && ev.code >= 4000 && ev.code <= 4099) {
+          keyAttemptIndex = (keyAttemptIndex + 1) % KNOWN_PUSHER_KEYS.length;
+          pusherAppKey = KNOWN_PUSHER_KEYS[keyAttemptIndex].key;
+          pusherCluster = KNOWN_PUSHER_KEYS[keyAttemptIndex].cluster;
+          connectDirectlyToPusher(currentChatroomId, currentChannelSlug, true);
+          return;
+        }
+        if (currentChatroomId) {
+          setConnectionStatus('idle', 'اتصال بسته شد');
+        }
+      };
+    }
+
+    function startHeartbeatClock() {
+      clearInterval(heartbeatInterval);
+      const timerEl = document.getElementById('heartbeatTimer');
+      heartbeatInterval = setInterval(() => {
+        if (!connectedSince) return;
+        const sec = Math.floor((Date.now() - connectedSince) / 1000);
+        const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+        const ss = String(sec % 60).padStart(2, '0');
+        timerEl.textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+
+    // --- Handle Incoming Kick Message ---
+    function handleIncomingKickMessage(payload, isDemo = false) {
+      if (!payload) return;
+      const msgObj = payload.message ? payload.message : payload;
+      const msgId = msgObj.id || ('msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7));
+      if (seenMessageIds.has(msgId)) return;
+      seenMessageIds.add(msgId);
+
+      const sender = payload.sender || payload.user || { username: 'User', identity: { color: '#53FC18', badges: [] } };
+      const username = sender.username || sender.slug || 'Anon';
+      const content = msgObj.content || msgObj.message || '';
+      if (!content) return;
+
+      const color = (sender.identity && sender.identity.color) ? sender.identity.color : '#53FC18';
+      const rawBadges = (sender.identity && Array.isArray(sender.identity.badges)) ? [...sender.identity.badges] : [];
+      const createdAt = msgObj.created_at ? new Date(msgObj.created_at) : new Date();
+
+      // Reply metadata (if message is a reply like row 3 in user's screenshot)
+      let replyInfo = null;
+      const metadata = msgObj.metadata || payload.metadata;
+      if (metadata && (metadata.original_sender || metadata.original_message)) {
+        replyInfo = {
+          toUser: metadata.original_sender?.username || 'user',
+          toText: metadata.original_message?.content
+            ? metadata.original_message.content.replace(/\[emote:\d+:([^\]]+)\]/g, '$1')
+            : '...'
+        };
+      } else if (msgObj.reply_to || payload.reply_to) {
+        replyInfo = msgObj.reply_to || payload.reply_to;
+      }
+
+      // Ensure every user has their Kick level pill badge first, followed by role/sub badges
+      const autoLevel = computeUserLevelBadge(username, rawBadges);
+      const badges = autoLevel ? [autoLevel, ...rawBadges] : rawBadges;
+
+      const item = {
+        id: msgId,
+        username,
+        color,
+        badges,
+        content,
+        replyInfo,
+        isDemo,
+        timeStr: createdAt.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+      };
+
+      messagesList.push(item);
+      if (messagesList.length > 400) {
+        messagesList.shift();
+      }
+
+      // Forward to external Popout Window if open
+      if (popoutWindowRef && !popoutWindowRef.closed && typeof popoutWindowRef.receiveKickMessage === 'function') {
+        try {
+          popoutWindowRef.receiveKickMessage(item);
+        } catch (e) {}
+      }
+
+      // Stats
+      const now = Date.now();
+      messageTimestamps.push(now);
+      uniqueSenders.add(username);
+      updateLiveStats();
+
+      // Highlight & Sound / TTS
+      const highlightRaw = document.getElementById('highlightInput').value.trim();
+      let isHighlighted = false;
+      if (highlightRaw) {
+        const keywords = highlightRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+        isHighlighted = keywords.some(kw => content.toLowerCase().includes(kw) || username.toLowerCase().includes(kw));
+      }
+
+      if (isHighlighted && document.getElementById('chkSoundAlert').checked) {
+        playHighlightBeep();
+      }
+      if (document.getElementById('chkTtsEnabled').checked) {
+        speakMessage(username, content);
+      }
+
+      renderMessagesFeed();
+    }
+
+    function addSystemNotice(text, isDemo = false) {
+      messagesList.push({
+        id: 'sys_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+        isSystem: true,
+        isDemo,
+        content: text,
+        timeStr: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+      });
+      renderMessagesFeed();
+    }
+
+    function updateLiveStats() {
+      const now = Date.now();
+      messageTimestamps = messageTimestamps.filter(t => now - t < 60000);
+      document.getElementById('statTotalMsgs').textContent = messagesList.filter(m => !m.isSystem).length;
+      document.getElementById('statMsgsPerMin').textContent = messageTimestamps.length;
+      document.getElementById('statUniqueUsers').textContent = uniqueSenders.size;
+    }
+
+    function renderMessagesFeed() {
+      const container = document.getElementById('chatMessagesContainer');
+      const emptyBox = document.getElementById('emptyStateBox');
+      const filterQuery = document.getElementById('searchFilterInput').value.trim().toLowerCase();
+      const highlightRaw = document.getElementById('highlightInput').value.trim();
+      const keywords = highlightRaw ? highlightRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean) : [];
+      const showTime = document.getElementById('chkShowTime').checked;
+      const showBadges = document.getElementById('chkShowBadges').checked;
+      const fontSize = document.getElementById('fontSizeRange').value;
+
+      const filtered = messagesList.filter(m => {
+        if (!filterQuery) return true;
+        if (m.isSystem) return m.content.toLowerCase().includes(filterQuery);
+        return m.username.toLowerCase().includes(filterQuery) || m.content.toLowerCase().includes(filterQuery);
+      });
+
+      if (filtered.length === 0 && messagesList.length === 0) {
+        emptyBox.classList.remove('hidden');
+        return;
+      }
+      emptyBox.classList.add('hidden');
+
+      const fragment = document.createDocumentFragment();
+      filtered.slice(-180).forEach(msg => {
+        const row = document.createElement('div');
+        if (msg.isSystem) {
+          row.className = 'kick-chat-line my-1 bg-[#14171A] border border-[#24292E] text-xs text-gray-300 flex items-center justify-between gap-2';
+          row.setAttribute('dir', 'rtl');
+          row.style.textAlign = 'right';
+          row.innerHTML = `<span class="leading-relaxed">${msg.content}</span><span class="font-mono text-[10px] text-gray-500 shrink-0">${msg.timeStr}</span>`;
+        } else {
+          const isHighlighted = keywords.length > 0 && keywords.some(kw => msg.content.toLowerCase().includes(kw) || msg.username.toLowerCase().includes(kw));
+          row.className = `kick-chat-line group cursor-pointer ${isHighlighted ? 'highlighted-msg' : ''}`;
+          row.style.fontSize = `${fontSize}px`;
+
+          // Reply preview line (like "↩ Replying to Mr_Radikall: are man akhe..." in user's screenshot)
+          let replyHtml = '';
+          if (msg.replyInfo) {
+            replyHtml = `
+              <div class="kick-reply-preview">
+                <span>↩</span>
+                <span>Replying to <strong class="text-gray-300">@${escapeHtmlStr(msg.replyInfo.toUser)}</strong>: ${escapeHtmlStr(msg.replyInfo.toText)}</span>
+              </div>
+            `;
+          }
+
+          // Badges HTML
+          let badgesHtml = '';
+          if (showBadges && msg.badges && msg.badges.length > 0) {
+            badgesHtml = `<span class="kick-badges-wrap">${msg.badges.map(b => getKickBadgeSvg(b, msg.username)).join('')}</span>`;
+          }
+
+          const timeHtml = showTime ? `<span class="text-[11px] font-mono text-gray-500 mr-1.5" dir="ltr">${msg.timeStr}</span>` : '';
+
+          row.innerHTML = `
+            ${replyHtml}
+            <div class="flex items-start justify-between gap-2" dir="ltr">
+              <div class="flex-1 leading-snug" dir="ltr">
+                ${timeHtml}${badgesHtml}<span class="kick-username" style="color: ${msg.color}">${escapeHtmlStr(msg.username)}</span><span class="kick-colon">:</span>${formatKickMessageContent(msg.content)}
+              </div>
+              <div class="opacity-0 group-hover:opacity-100 transition flex items-center gap-1 shrink-0">
+                <button type="button" class="pin-btn text-[11px] px-1.5 py-0.5 rounded bg-[#1D2226] hover:bg-kick hover:text-black text-gray-300" title="Pin">📌</button>
+                <button type="button" class="copy-btn text-[11px] px-1.5 py-0.5 rounded bg-[#1D2226] hover:bg-sky-400 hover:text-black text-gray-300" title="Copy">📋</button>
+              </div>
+            </div>
+          `;
+
+          row.querySelector('.pin-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            pinChatMessage(msg);
+          });
+          row.querySelector('.copy-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyChatMessage(msg);
+          });
+          row.addEventListener('click', () => pinChatMessage(msg));
+        }
+        fragment.appendChild(row);
+      });
+
+      Array.from(container.children).forEach(ch => {
+        if (ch.id !== 'emptyStateBox') ch.remove();
+      });
+      container.appendChild(fragment);
+
+      if (isAutoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function pinChatMessage(msg) {
+      const bar = document.getElementById('pinnedMessageBar');
+      document.getElementById('pinnedAuthor').textContent = msg.username;
+      document.getElementById('pinnedAuthor').style.color = msg.color || '#53FC18';
+      document.getElementById('pinnedContent').textContent = msg.content.replace(/\[emote:\d+:([^\]]+)\]/g, '$1');
+      bar.classList.remove('hidden');
+      showToast(`پیام ${msg.username} در بالای چت سنجاق شد.`);
+    }
+
+    function copyChatMessage(msg) {
+      const text = `${msg.username}: ${msg.content.replace(/\[emote:\d+:([^\]]+)\]/g, '$1')}`;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        showToast('متن پیام کپی شد.');
+      } catch (e) {}
+    }
+
+    // --- Realistic Demo Messages Matching User's Screenshot (Finglish + Persian + Badges + Emotes + Replies) ---
+    const DEMO_MESSAGES = [
+      {
+        username: 'lol_matin',
+        color: '#E11D48',
+        badges: [{ type: 'level', isLevelBadge: true, level: 42 }, { type: 'og' }, { type: 'subscriber', count: 6 }],
+        content: 'bad bahushi 5Head'
+      },
+      {
+        username: 'nokhodkesh',
+        color: '#F43F5E',
+        badges: [{ type: 'level', isLevelBadge: true, level: 44 }, { type: 'subscriber', count: 3 }],
+        content: '[emote:37226:KEKW]'
+      },
+      {
+        username: 'erf_hastam',
+        color: '#6366F1',
+        badges: [{ type: 'level', isLevelBadge: true, level: 27, variant: 'pink-pill' }],
+        reply_to: { toUser: 'Mr_Radikall', toText: 'are man akhe eimeni badan az aksar...' },
+        content: 'اره ربط داره واقعا برا هر نفر متفاوته'
+      },
+      {
+        username: 'AhmadRamzy',
+        color: '#FFFFFF',
+        badges: [{ type: 'level', isLevelBadge: true, level: 48 }, { type: 'vip' }, { type: 'subscriber', count: 12 }],
+        content: 'didi goftam familim [emote:37226:KEKW] e bavar nakardi?'
+      },
+      {
+        username: 'aashittaka',
+        color: '#FDA4AF',
+        badges: [{ type: 'level', isLevelBadge: true, level: 33, variant: 'cyan-shield' }],
+        content: 'بوگی هم عاشق پیتزا داوود تو این کوچه اس'
+      },
+      {
+        username: 'Mr_Radikall',
+        color: '#EF4444',
+        badges: [{ type: 'level', isLevelBadge: true, level: 47 }, { type: 'founder' }, { type: 'og' }, { type: 'subscriber', count: 9 }],
+        content: 'delam pizza davod mikhad akharin bar ke raftam tehran gharar bod berim bokhorim vali naraftim [emote:37226:KEKW]'
+      }
+    ];
+
+    function toggleSimulator() {
+      if (simInterval) {
+        stopSimulator();
+        showToast('شبیه‌ساز چت متوقف شد.');
+        return;
+      }
+      if (ws) {
+        try { ws.onclose = null; ws.close(); } catch (e) {}
+        ws = null;
+      }
+      setConnectionStatus('simulating', 'در حال اجرای شبیه‌ساز زنده');
+      document.getElementById('simBtnLabel').textContent = 'توقف شبیه‌ساز';
+      document.getElementById('chatHeaderTitle').textContent = 'KICK LIVE CHAT (DEMO)';
+
+      let idx = 0;
+      handleIncomingKickMessage({ id: 'sim_init_' + Date.now(), content: DEMO_MESSAGES[0].content, reply_to: DEMO_MESSAGES[0].reply_to || null, created_at: new Date().toISOString(), sender: { username: DEMO_MESSAGES[0].username, identity: { color: DEMO_MESSAGES[0].color, badges: DEMO_MESSAGES[0].badges } } }, true);
+      idx = 1;
+      simInterval = setInterval(() => {
+        const sample = DEMO_MESSAGES[idx % DEMO_MESSAGES.length];
+        handleIncomingKickMessage({
+          id: 'sim_' + Date.now() + '_' + idx,
+          content: sample.content,
+          reply_to: sample.reply_to || null,
+          created_at: new Date().toISOString(),
+          sender: {
+            username: sample.username,
+            identity: { color: sample.color, badges: sample.badges }
+          }
+        }, true);
+        idx++;
+      }, 2000);
+    }
+
+    function stopSimulator() {
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+      }
+      document.getElementById('simBtnLabel').textContent = 'شبیه‌ساز چت زنده';
+      setConnectionStatus('idle', 'آماده اتصال');
+    }
+
+    // --- Popout Window & In-App Popout View Logic ---
+    function setInlinePopoutMode(enable) {
+      const quickBar = document.getElementById('popoutQuickBar');
+      const topBtn = document.getElementById('btnTopPopoutView');
+      if (enable) {
+        document.body.classList.add('popout-view-active');
+        quickBar.classList.remove('hidden');
+        topBtn.classList.add('hidden');
+        showToast('نمای پاپ‌آوت کیک فعال شد.');
+      } else {
+        document.body.classList.remove('popout-view-active');
+        quickBar.classList.add('hidden');
+        topBtn.classList.remove('hidden');
+      }
+    }
+
+    function openRealPopoutWindow() {
+      // Try opening a native browser popout window first
+      try {
+        const popWin = window.open('', 'KickChatPopoutWindow', 'width=420,height=740,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes');
+        if (popWin && popWin.document) {
+          popoutWindowRef = popWin;
+          const fullHtml = document.documentElement.outerHTML.replace(
+            '<body class="',
+            '<body class="popout-view-active '
+          );
+          popWin.document.open();
+          popWin.document.write(fullHtml);
+          popWin.document.close();
+          showToast('پنجره پاپ‌آوت مستقل باز شد!');
+          return;
+        }
+      } catch (e) {}
+      // If iframe blocks window.open, switch immediately to clean Popout View inside Canvas
+      setInlinePopoutMode(true);
+    }
+
+    function downloadStandalonePopoutHtml() {
+      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML.replace(
+        '<body class="',
+        '<body class="popout-view-active '
+      );
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kick-popout-chat-${currentChannelSlug || 'live'}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('فایل مستقل پاپ‌آوت دانلود شد (قابل باز کردن در مرورگر و OBS).');
+    }
+
+    // --- Event Listeners Setup ---
+    window.addEventListener('DOMContentLoaded', () => {
+      renderSavedChannels();
+
+      // If opened in popout-view-active mode, show quick bar
+      if (document.body.classList.contains('popout-view-active')) {
+        document.getElementById('popoutQuickBar').classList.remove('hidden');
+        document.getElementById('btnTopPopoutView').classList.add('hidden');
+      }
+
+      // Render initial Kick-style messages matching the user's screenshot so they immediately see the exact UI & BiDi fix
+      DEMO_MESSAGES.forEach((m, i) => {
+        handleIncomingKickMessage({
+          id: 'welcome_demo_' + i,
+          content: m.content,
+          reply_to: m.reply_to || null,
+          created_at: new Date().toISOString(),
+          sender: { username: m.username, identity: { color: m.color, badges: m.badges } }
+        }, true);
+      });
+
+      // Popout Buttons
+      document.getElementById('btnPopoutWindow').addEventListener('click', openRealPopoutWindow);
+      document.getElementById('btnTopPopoutView').addEventListener('click', () => setInlinePopoutMode(true));
+      document.getElementById('btnInlinePopoutMode').addEventListener('click', () => setInlinePopoutMode(true));
+      document.getElementById('btnExitPopoutView').addEventListener('click', () => setInlinePopoutMode(false));
+      document.getElementById('btnDownloadPopoutHtml').addEventListener('click', downloadStandalonePopoutHtml);
+
+      // Quick Connect inside Popout Header
+      const triggerQuickPopoutConnect = async () => {
+        const val = document.getElementById('popoutQuickSlug').value.trim();
+        if (!val) return;
+        stopSimulator();
+        if (/^\d+$/.test(val)) {
+          connectDirectlyToPusher(Number(val), `Room_${val}`);
+        } else {
+          try {
+            const cid = await resolveChannelSlugToChatroomId(val);
+            connectDirectlyToPusher(cid, val);
+          } catch (e) {
+            showToast('کد عددی کانال (Chatroom ID) را وارد کنید.');
+          }
+        }
+      };
+      document.getElementById('btnPopoutQuickConnect').addEventListener('click', triggerQuickPopoutConnect);
+      document.getElementById('popoutQuickSlug').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') triggerQuickPopoutConnect();
+      });
+
+      // Mode Tabs
+      const tabSlug = document.getElementById('tabModeSlug');
+      const tabId = document.getElementById('tabModeId');
+      const slugBox = document.getElementById('slugInputBox');
+      const idBox = document.getElementById('idInputBox');
+
+      tabSlug.addEventListener('click', () => {
+        inputMode = 'slug';
+        tabSlug.className = 'py-1.5 px-2 rounded-lg font-medium bg-[#1D2226] text-kick shadow transition';
+        tabId.className = 'py-1.5 px-2 rounded-lg font-medium text-gray-400 hover:text-white transition';
+        slugBox.classList.remove('hidden');
+        idBox.classList.add('hidden');
+      });
+
+      tabId.addEventListener('click', () => {
+        inputMode = 'id';
+        tabId.className = 'py-1.5 px-2 rounded-lg font-medium bg-[#1D2226] text-kick shadow transition';
+        tabSlug.className = 'py-1.5 px-2 rounded-lg font-medium text-gray-400 hover:text-white transition';
+        idBox.classList.remove('hidden');
+        slugBox.classList.add('hidden');
+      });
+
+      // Connect Process
+      async function triggerConnect() {
+        stopSimulator();
+        document.getElementById('manualIdHelperBox').classList.add('hidden');
+
+        if (inputMode === 'id') {
+          const rawInput = document.getElementById('chatroomIdInput').value.trim();
+          const customLabel = document.getElementById('customLabelInput').value.trim();
+          const extracted = extractChatroomIdFromRawText(rawInput);
+          if (!extracted) {
+            showToast('لطفاً کد عددی Chatroom ID یا متن JSON کانال را وارد کنید.');
+            return;
+          }
+          connectDirectlyToPusher(extracted, customLabel || `Room_${extracted}`);
+        } else {
+          const slug = document.getElementById('channelSlugInput').value.trim();
+          if (!slug) {
+            showToast('لطفاً نام کانال کیک (مثلاً xqc) را وارد کنید.');
+            return;
+          }
+          setConnectionStatus('connecting', `در حال یافتن کد کانال ${slug}...`);
+          try {
+            const chatroomId = await resolveChannelSlugToChatroomId(slug);
+            connectDirectlyToPusher(chatroomId, slug);
+          } catch (err) {
+            setConnectionStatus('error', 'نیاز به کد چت‌روم');
+            const cleanSlug = slug.replace(/^@/, '').trim();
+            document.getElementById('blockedSlugName').textContent = cleanSlug;
+            document.getElementById('jinaHelperLink').href = `https://r.jina.ai/https://kick.com/api/v2/channels/${encodeURIComponent(cleanSlug)}`;
+            document.getElementById('manualIdHelperBox').classList.remove('hidden');
+            showToast('راهنمای دریافت ۱۰ ثانیه‌ای کد کانال باز شد.');
+          }
+        }
+      }
+
+      document.getElementById('btnConnect').addEventListener('click', triggerConnect);
+      document.getElementById('channelSlugInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') triggerConnect();
+      });
+      document.getElementById('chatroomIdInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') triggerConnect();
+      });
+
+      // Manual JSON/ID Extractor inside Helper Box
+      document.getElementById('btnCloseHelper').addEventListener('click', () => {
+        document.getElementById('manualIdHelperBox').classList.add('hidden');
+      });
+      document.getElementById('btnExtractAndConnect').addEventListener('click', () => {
+        const raw = document.getElementById('pasteJsonExtractorInput').value;
+        const slug = document.getElementById('channelSlugInput').value.trim() || 'Channel';
+        const cid = extractChatroomIdFromRawText(raw);
+        if (!cid) {
+          showToast('کد عددی معتبر در متن پیست‌شده پیدا نشد.');
+          return;
+        }
+        document.getElementById('manualIdHelperBox').classList.add('hidden');
+        connectDirectlyToPusher(cid, slug);
+        showToast(`کد ${cid} استخراج و برای همیشه ذخیره شد!`);
+      });
+
+      // Send Single Test Message Button
+      document.getElementById('btnSendTestMsg').addEventListener('click', () => {
+        const sample = DEMO_MESSAGES[Math.floor(Math.random() * DEMO_MESSAGES.length)];
+        handleIncomingKickMessage({
+          id: 'test_' + Date.now(),
+          content: sample.content,
+          reply_to: sample.reply_to || null,
+          created_at: new Date().toISOString(),
+          sender: {
+            username: sample.username,
+            identity: { color: sample.color, badges: sample.badges }
+          }
+        });
+      });
+
+      // Disconnect Button
+      document.getElementById('btnDisconnect').addEventListener('click', () => {
+        if (ws) {
+          try { ws.onclose = null; ws.close(); } catch (e) {}
+          ws = null;
+        }
+        clearInterval(heartbeatInterval);
+        clearInterval(pingTimer);
+        currentChatroomId = null;
+        setConnectionStatus('idle', 'قطع شد');
+        showToast('اتصال چت قطع شد.');
+      });
+
+      // Clear Saved Channels
+      document.getElementById('btnClearSaved').addEventListener('click', () => {
+        try { localStorage.removeItem('kick_saved_channels_v2'); } catch (e) {}
+        renderSavedChannels();
+        showToast('لیست کانال‌ها به حالت پیش‌فرض بازنشانی شد.');
+      });
+
+      // Simulator Toggle
+      document.getElementById('btnSimToggle').addEventListener('click', toggleSimulator);
+
+      // OBS Mode Toggle
+      const toggleObsMode = () => {
+        const header = document.getElementById('appHeader');
+        const sidebar = document.getElementById('controlSidebar');
+        const chatCol = document.getElementById('chatColumn');
+        const exitBtn = document.getElementById('btnExitObs');
+        const isObs = document.body.classList.toggle('obs-transparent');
+        if (isObs) {
+          header.classList.add('hidden');
+          sidebar.classList.add('hidden');
+          chatCol.classList.remove('lg:col-span-8');
+          chatCol.classList.add('lg:col-span-12', 'h-[94vh]');
+          exitBtn.classList.remove('hidden');
+          showToast('حالت OBS فعال شد.');
+        } else {
+          header.classList.remove('hidden');
+          sidebar.classList.remove('hidden');
+          chatCol.classList.add('lg:col-span-8');
+          chatCol.classList.remove('lg:col-span-12', 'h-[94vh]');
+          exitBtn.classList.add('hidden');
+        }
+      };
+      document.getElementById('btnObsMode').addEventListener('click', toggleObsMode);
+      document.getElementById('btnExitObs').addEventListener('click', toggleObsMode);
+
+      // Pause / Resume Auto-Scroll
+      const pauseBtn = document.getElementById('btnPauseScroll');
+      const resumeBanner = document.getElementById('scrollResumeBanner');
+      const setScrollPause = (paused) => {
+        isAutoScroll = !paused;
+        if (paused) {
+          pauseBtn.textContent = '▶️ ادامه اسکرول';
+          pauseBtn.classList.add('border-kick', 'text-kick');
+          resumeBanner.classList.remove('hidden');
+        } else {
+          pauseBtn.textContent = '⏸️ توقف اسکرول';
+          pauseBtn.classList.remove('border-kick', 'text-kick');
+          resumeBanner.classList.add('hidden');
+          const c = document.getElementById('chatMessagesContainer');
+          c.scrollTop = c.scrollHeight;
+        }
+      };
+      pauseBtn.addEventListener('click', () => setScrollPause(isAutoScroll));
+      document.getElementById('btnResumeScrollNow').addEventListener('click', () => setScrollPause(false));
+
+      // Export Logs
+      document.getElementById('btnExportLogs').addEventListener('click', () => {
+        if (messagesList.length === 0) {
+          showToast('هنوز پیامی برای ذخیره‌سازی وجود ندارد.');
+          return;
+        }
+        const lines = messagesList.map(m => m.isSystem ? `[${m.timeStr}] * ${m.content}` : `[${m.timeStr}] ${m.username}: ${m.content}`).join('\n');
+        const blob = new Blob([lines], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kick-chat-${currentChannelSlug || 'log'}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('فایل لاگ چت دانلود شد.');
+      });
+
+      // Clear Chat
+      document.getElementById('btnClearChat').addEventListener('click', () => {
+        messagesList = [];
+        messageTimestamps = [];
+        uniqueSenders.clear();
+        seenMessageIds.clear();
+        updateLiveStats();
+        const container = document.getElementById('chatMessagesContainer');
+        Array.from(container.children).forEach(ch => {
+          if (ch.id !== 'emptyStateBox') ch.remove();
+        });
+        document.getElementById('emptyStateBox').classList.remove('hidden');
+        showToast('صفحه چت پاکسازی شد.');
+      });
+
+      // Unpin
+      document.getElementById('btnUnpin').addEventListener('click', () => {
+        document.getElementById('pinnedMessageBar').classList.add('hidden');
+      });
+
+      // Filter & Appearance Controls
+      document.getElementById('searchFilterInput').addEventListener('input', renderMessagesFeed);
+      document.getElementById('highlightInput').addEventListener('input', renderMessagesFeed);
+      document.getElementById('chkShowTime').addEventListener('change', renderMessagesFeed);
+      document.getElementById('chkShowBadges').addEventListener('change', renderMessagesFeed);
+      document.getElementById('fontSizeRange').addEventListener('input', (e) => {
+        document.getElementById('fontSizeValue').textContent = `${e.target.value}px`;
+        renderMessagesFeed();
+      });
+
+      // Settings Modal
+      const settingsModal = document.getElementById('settingsModal');
+      document.getElementById('btnOpenSettings').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+      document.getElementById('btnCloseSettings').addEventListener('click', () => settingsModal.classList.add('hidden'));
+      document.getElementById('btnPresetKey1').addEventListener('click', () => {
+        document.getElementById('pusherKeyInput').value = '32cbd69e4b950bf97679';
+      });
+      document.getElementById('btnPresetKey2').addEventListener('click', () => {
+        document.getElementById('pusherKeyInput').value = '34bf7a0ff419a2a775b9';
+      });
+      document.getElementById('btnSaveSettings').addEventListener('click', () => {
+        pusherAppKey = document.getElementById('pusherKeyInput').value.trim() || '32cbd69e4b950bf97679';
+        pusherCluster = document.getElementById('pusherClusterInput').value.trim() || 'us2';
+        customProxyUrl = document.getElementById('customProxyInput').value.trim();
+        settingsModal.classList.add('hidden');
+        showToast('تنظیمات وب‌سوکت و پروکسی ذخیره شد.');
+      });
+    });
+  </script>
+</body>
+</html>
