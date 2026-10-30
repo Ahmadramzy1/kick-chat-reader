@@ -394,6 +394,13 @@
           </div>
         </div>
 
+        <div class="space-y-2 border border-kick/30 rounded-xl p-3">
+          <label for="botrixOverlayUrl" class="block text-xs text-gray-300">آزمایشی: لینک اورلی چت BotRix برای ایموت‌های 7TV</label>
+          <input id="botrixOverlayUrl" type="url" dir="ltr" placeholder="https://botrix.live/widgets/chat/?bid=..." class="w-full bg-[#0B0E0F] border border-[#2C333A] rounded-xl px-3 py-2 text-xs text-white" />
+          <button id="btnLoad7tv" type="button" class="bg-kick px-3 py-2 rounded-lg text-xs font-bold">بارگذاری ایموت‌های 7TV</button>
+          <p id="sevenTvStatus" class="text-xs text-gray-400" role="status">لینک فقط برای این بار استفاده می‌شود و ذخیره نمی‌شود.</p>
+        </div>
+
         <!-- Search & Filter Input -->
         <div class="space-y-2">
           <label for="searchFilterInput" class="block text-xs text-gray-300">جستجو در چت یا فیلتر کاربر خاص:</label>
@@ -771,6 +778,16 @@
       return `<img src="${proxySrc}" data-fallback="${directSrc}" alt="${safeName}" title="${safeName}" class="kick-emote-img" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');}else{this.outerHTML='<span class=\\'text-kick font-mono text-xs px-1\\'>['+this.alt+']</span>';}" />`;
     }
 
+    const sevenTvEmotes = new Map();
+    function formatTextWith7tv(text, dirAttr, dirClass) {
+      return text.split(/(\s+)/).map(part => {
+        const id = sevenTvEmotes.get(part);
+        if (!id) return `<bdi dir="${dirAttr}" class="kick-msg-text ${dirClass}">${escapeHtmlStr(part)}</bdi>`;
+        const src = `https://cdn.7tv.app/emote/${encodeURIComponent(id)}/2x.webp`;
+        return `<img src="${src}" alt="${escapeHtmlStr(part)}" title="${escapeHtmlStr(part)}" class="kick-emote-img" />`;
+      }).join('');
+    }
+
     function formatKickMessageContent(rawContent) {
       const str = String(rawContent || '');
       // Detect whether the text is primarily Persian/Arabic or LTR (English/Finglish)
@@ -787,7 +804,7 @@
       while ((match = tokenRegex.exec(str)) !== null) {
         if (match.index > lastIndex) {
           const textSeg = str.slice(lastIndex, match.index);
-          partsHtml += `<bdi dir="${dirAttr}" class="kick-msg-text ${dirClass}">${escapeHtmlStr(textSeg)}</bdi>`;
+          partsHtml += formatTextWith7tv(textSeg, dirAttr, dirClass);
         }
         partsHtml += renderEmoteImgHtml(match[1], match[2]);
         lastIndex = tokenRegex.lastIndex;
@@ -795,7 +812,7 @@
 
       if (lastIndex < str.length) {
         const remaining = str.slice(lastIndex);
-        partsHtml += `<bdi dir="${dirAttr}" class="kick-msg-text ${dirClass}">${escapeHtmlStr(remaining)}</bdi>`;
+        partsHtml += formatTextWith7tv(remaining, dirAttr, dirClass);
       }
 
       return partsHtml;
@@ -1521,6 +1538,26 @@
     // --- Event Listeners Setup ---
     window.addEventListener('DOMContentLoaded', () => {
       renderSavedChannels();
+      document.getElementById('btnLoad7tv').addEventListener('click', async () => {
+        const input = document.getElementById('botrixOverlayUrl');
+        const status = document.getElementById('sevenTvStatus');
+        const button = document.getElementById('btnLoad7tv');
+        button.disabled = true;
+        status.textContent = 'در حال دریافت ایموت‌ها...';
+        try {
+          const response = await fetch('https://kick-chat-emotes.miomio34.workers.dev/', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url: input.value.trim()})});
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'خطا در دریافت ایموت‌ها');
+          sevenTvEmotes.clear();
+          data.emotes.forEach(e => sevenTvEmotes.set(e.name, e.id));
+          input.value = '';
+          status.textContent = `${sevenTvEmotes.size} ایموت بارگذاری شد. ${data.channelFound ? 'ایموت‌های کانال و عمومی فعال هستند.' : 'فقط ایموت‌های عمومی دریافت شدند؛ مجموعه کانال پیدا نشد یا در دسترس نبود.'}`;
+          renderMessagesFeed();
+        } catch (error) {
+          status.textContent = 'بارگذاری ناموفق بود: ' + error.message;
+        } finally { button.disabled = false; }
+      });
+
 
       // If opened in popout-view-active mode, show quick bar
       if (document.body.classList.contains('popout-view-active')) {
