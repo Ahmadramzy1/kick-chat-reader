@@ -311,18 +311,6 @@
           </button>
         </div>
 
-        <!-- Popout Options Bar -->
-        <div class="grid grid-cols-2 gap-2 mt-2.5">
-          <button id="btnInlinePopoutMode" type="button" class="py-2 px-3 rounded-xl bg-[#1D2226] hover:bg-[#282F36] border border-[#2C333A] text-xs text-gray-200 font-medium transition flex items-center justify-center gap-1.5">
-            <span>📱</span>
-            <span>نمای تمام‌صفحه پاپ‌آوت</span>
-          </button>
-          <button id="btnDownloadPopoutHtml" type="button" class="py-2 px-3 rounded-xl bg-[#1D2226] hover:bg-[#282F36] border border-[#2C333A] text-xs text-kick font-medium transition flex items-center justify-center gap-1.5" title="دانلود فایل پاپ‌آوت برای باز کردن در مرورگر یا OBS">
-            <span>📥</span>
-            <span>فایل مستقل پاپ‌آوت</span>
-          </button>
-        </div>
-
         <!-- Manual ID Extractor Helper Box -->
         <div id="manualIdHelperBox" class="hidden mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-xs space-y-2">
           <div class="font-bold text-amber-300 flex items-center justify-between">
@@ -350,57 +338,15 @@
           </div>
         </div>
 
-        <!-- Preset & Saved Channels -->
-        <div class="mt-4 pt-3 border-t border-[#24292E]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-medium text-gray-300">کانال‌های آماده (اتصال فوری بدون استعلام):</span>
-            <button id="btnClearSaved" type="button" class="text-[11px] text-gray-400 hover:text-red-400 transition">پاکسازی کش</button>
-          </div>
-          <div id="savedChannelsList" class="flex flex-wrap gap-1.5"></div>
-        </div>
       </section>
 
       <!-- Live Statistics & Filter Controls -->
       <section class="bg-[#14171A] border border-[#24292E] rounded-2xl p-4 shadow-lg space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="font-bold text-sm text-white">آمار زنده و فیلتر پیام‌ها</h2>
-          <span id="chatroomIdBadge" class="text-[11px] font-mono bg-[#0B0E0F] px-2 py-0.5 rounded-md text-gray-400 border border-[#24292E]">ID: ---</span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
-            <div id="statTotalMsgs" class="text-lg font-bold text-white font-mono">0</div>
-            <div class="text-[11px] text-gray-400">کل پیام‌ها</div>
-          </div>
-          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
-            <div id="statMsgsPerMin" class="text-lg font-bold text-kick font-mono">0</div>
-            <div class="text-[11px] text-gray-400">پیام / دقیقه</div>
-          </div>
-          <div class="bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5">
-            <div id="statUniqueUsers" class="text-lg font-bold text-sky-400 font-mono">0</div>
-            <div class="text-[11px] text-gray-400">کاربران فعال</div>
-          </div>
-        </div>
-
         <div class="space-y-2 border border-kick/30 rounded-xl p-3">
           <label for="botrixOverlayUrl" class="block text-xs text-gray-300">آزمایشی: لینک اورلی چت BotRix برای ایموت‌های 7TV</label>
           <input id="botrixOverlayUrl" type="url" dir="ltr" placeholder="https://botrix.live/widgets/chat/?bid=..." class="w-full bg-[#0B0E0F] border border-[#2C333A] rounded-xl px-3 py-2 text-xs text-white" />
           <button id="btnLoad7tv" type="button" class="bg-kick px-3 py-2 rounded-lg text-xs font-bold">بارگذاری ایموت‌های 7TV</button>
           <p id="sevenTvStatus" class="text-xs text-gray-400" role="status">لینک فقط برای این بار استفاده می‌شود و ذخیره نمی‌شود.</p>
-        </div>
-
-        <!-- Search & Filter Input -->
-        <div class="space-y-2">
-          <label for="searchFilterInput" class="block text-xs text-gray-300">جستجو در چت یا فیلتر کاربر خاص:</label>
-          <input id="searchFilterInput" type="text" placeholder="جستجوی متن یا نام کاربری..."
-            class="w-full bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500" />
-        </div>
-
-        <!-- Highlight Keyword Input -->
-        <div class="space-y-2">
-          <label for="highlightInput" class="block text-xs text-gray-300">کلمات کلیدی مهم (هایلایت با رنگ سبز):</label>
-          <input id="highlightInput" type="text" placeholder="مثلاً اسم خودتان یا کلمه کلیدی (با کاما جدا کنید)"
-            class="w-full bg-[#0B0E0F] border border-[#2C333A] focus:border-kick focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500" />
         </div>
 
         <!-- Quick Toggles -->
@@ -412,10 +358,6 @@
           <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
             <input id="chkShowBadges" type="checkbox" checked class="accent-kick w-4 h-4 rounded" />
             <span>نشان‌ها (Badges)</span>
-          </label>
-          <label class="flex items-center gap-2 bg-[#0B0E0F] border border-[#24292E] rounded-xl p-2.5 cursor-pointer hover:border-gray-600 transition">
-            <input id="chkSoundAlert" type="checkbox" class="accent-kick w-4 h-4 rounded" />
-            <span>بیپ پیام هایلایت</span>
           </label>
         </div>
 
@@ -457,12 +399,6 @@
           <button id="btnTopPopoutView" type="button" class="px-2.5 py-1 rounded-lg bg-kick/15 hover:bg-kick/25 text-kick border border-kick/30 text-xs font-medium transition" title="تبدیل به نمای خالص پاپ‌آوت کیک">
             🗗 نمای پاپ‌آوت
           </button>
-          <button id="btnPauseScroll" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-[#24292E] text-gray-300 border border-[#2C333A] text-xs transition">
-            ⏸️ توقف اسکرول
-          </button>
-          <button id="btnClearChat" type="button" class="px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-red-500/20 text-gray-300 hover:text-red-300 border border-[#2C333A] text-xs transition">
-            🗑️ پاک کردن
-          </button>
         </div>
       </div>
 
@@ -502,10 +438,6 @@
       </div>
 
       <!-- Scroll Paused Floating Banner -->
-      <div id="scrollResumeBanner" class="hidden bg-[#1D2226]/95 border-t border-kick/40 px-4 py-2 flex items-center justify-between text-xs text-gray-200">
-        <span>⏸️ اسکرول خودکار متوقف شده است</span>
-        <button id="btnResumeScrollNow" type="button" class="bg-kick text-black font-bold px-3 py-1 rounded-lg text-xs">پرش به آخرین پیام ↓</button>
-      </div>
 
       <!-- Bottom Status / Log Bar -->
       <div class="px-3.5 py-1.5 bg-[#14171A] border-t border-[#24292E] flex items-center justify-between text-[11px] text-gray-400">
@@ -606,15 +538,15 @@
     let lastPingSentAt = 0;
     let connectedSince = 0;
     let messagesList = [];
-    let messageTimestamps = [];
-    let uniqueSenders = new Set();
+
+
     let seenMessageIds = new Set();
     let inputMode = 'slug';
     let pusherAppKey = '32cbd69e4b950bf97679';
     let pusherCluster = 'us2';
     let keyAttemptIndex = 0;
     let customProxyUrl = '';
-    let audioCtx = null;
+
     let popoutWindowRef = null;
 
     // --- Authentic Kick SVG Badges (Exact visual match to Kick screenshot) ---
@@ -821,7 +753,7 @@
       try {
         localStorage.setItem('kick_saved_channels_v2', JSON.stringify(list.slice(0, 25)));
       } catch (e) {}
-      renderSavedChannels();
+
     }
 
     // --- UI Helpers ---
@@ -871,26 +803,6 @@
       }
     }
 
-    function playHighlightBeep() {
-      try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.18);
-      } catch (e) {}
-    }
-
     // --- Extract Chatroom ID from any raw string, JSON, or number ---
     function extractChatroomIdFromRawText(rawText) {
       if (!rawText) return null;
@@ -913,28 +825,6 @@
         if (data && data.id && data.slug) return Number(data.id);
       } catch (e) {}
       return null;
-    }
-
-    // --- Render Saved Channels Chips ---
-    function renderSavedChannels() {
-      const container = document.getElementById('savedChannelsList');
-      const list = loadSavedChannels();
-      container.innerHTML = '';
-      list.forEach(item => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'px-2.5 py-1 rounded-lg bg-[#0B0E0F] hover:bg-kick/15 hover:border-kick/40 border border-[#24292E] text-xs text-gray-200 font-mono transition flex items-center gap-1.5';
-        btn.innerHTML = `<span class="text-kick">#</span><span>${item.label}</span><span class="text-[10px] text-gray-500">(${item.chatroomId})</span>`;
-        btn.addEventListener('click', () => {
-
-          document.getElementById('manualIdHelperBox').classList.add('hidden');
-          document.getElementById('channelSlugInput').value = item.slug;
-          document.getElementById('chatroomIdInput').value = item.chatroomId;
-          document.getElementById('customLabelInput').value = item.label;
-          connectDirectlyToPusher(item.chatroomId, item.label);
-        });
-        container.appendChild(btn);
-      });
     }
 
     // --- Resolve Channel Name (Slug) Without VPN via 7 Multi-Route Fallbacks ---
@@ -1039,7 +929,6 @@
         renderMessagesFeed();
       }
 
-      document.getElementById('chatroomIdBadge').textContent = `ID: ${currentChatroomId}`;
       document.getElementById('chatHeaderTitle').textContent = `${currentChannelSlug.toUpperCase()} CHAT`;
       document.getElementById('connectionClusterTag').textContent = `ws-${pusherCluster}.pusher.com`;
       const activeTag = document.getElementById('activeChannelTag');
@@ -1205,24 +1094,6 @@
         } catch (e) {}
       }
 
-      // Stats
-      const now = Date.now();
-      messageTimestamps.push(now);
-      uniqueSenders.add(username);
-      updateLiveStats();
-
-      // Highlight & Sound / TTS
-      const highlightRaw = document.getElementById('highlightInput').value.trim();
-      let isHighlighted = false;
-      if (highlightRaw) {
-        const keywords = highlightRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
-        isHighlighted = keywords.some(kw => content.toLowerCase().includes(kw) || username.toLowerCase().includes(kw));
-      }
-
-      if (isHighlighted && document.getElementById('chkSoundAlert').checked) {
-        playHighlightBeep();
-      }
-
       renderMessagesFeed();
     }
 
@@ -1237,29 +1108,15 @@
       renderMessagesFeed();
     }
 
-    function updateLiveStats() {
-      const now = Date.now();
-      messageTimestamps = messageTimestamps.filter(t => now - t < 60000);
-      document.getElementById('statTotalMsgs').textContent = messagesList.filter(m => !m.isSystem).length;
-      document.getElementById('statMsgsPerMin').textContent = messageTimestamps.length;
-      document.getElementById('statUniqueUsers').textContent = uniqueSenders.size;
-    }
 
     function renderMessagesFeed() {
       const container = document.getElementById('chatMessagesContainer');
       const emptyBox = document.getElementById('emptyStateBox');
-      const filterQuery = document.getElementById('searchFilterInput').value.trim().toLowerCase();
-      const highlightRaw = document.getElementById('highlightInput').value.trim();
-      const keywords = highlightRaw ? highlightRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean) : [];
       const showTime = document.getElementById('chkShowTime').checked;
       const showBadges = document.getElementById('chkShowBadges').checked;
       const fontSize = document.getElementById('fontSizeRange').value;
 
-      const filtered = messagesList.filter(m => {
-        if (!filterQuery) return true;
-        if (m.isSystem) return m.content.toLowerCase().includes(filterQuery);
-        return m.username.toLowerCase().includes(filterQuery) || m.content.toLowerCase().includes(filterQuery);
-      });
+      const filtered = messagesList;
 
       if (filtered.length === 0 && messagesList.length === 0) {
         emptyBox.classList.remove('hidden');
@@ -1276,8 +1133,7 @@
           row.style.textAlign = 'right';
           row.innerHTML = `<span class="leading-relaxed">${msg.content}</span><span class="font-mono text-[10px] text-gray-500 shrink-0">${msg.timeStr}</span>`;
         } else {
-          const isHighlighted = keywords.length > 0 && keywords.some(kw => msg.content.toLowerCase().includes(kw) || msg.username.toLowerCase().includes(kw));
-          row.className = `kick-chat-line group cursor-pointer ${isHighlighted ? 'highlighted-msg' : ''}`;
+          row.className = 'kick-chat-line group cursor-pointer';
           row.style.fontSize = `${fontSize}px`;
 
           // Reply preview line (like "↩ Replying to Mr_Radikall: are man akhe..." in user's screenshot)
@@ -1398,24 +1254,9 @@
       setInlinePopoutMode(true);
     }
 
-    function downloadStandalonePopoutHtml() {
-      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML.replace(
-        '<body class="',
-        '<body class="popout-view-active '
-      );
-      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `kick-popout-chat-${currentChannelSlug || 'live'}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('فایل مستقل پاپ‌آوت دانلود شد (قابل باز کردن در مرورگر و OBS).');
-    }
-
     // --- Event Listeners Setup ---
     window.addEventListener('DOMContentLoaded', () => {
-      renderSavedChannels();
+
       document.getElementById('btnLoad7tv').addEventListener('click', async () => {
         const input = document.getElementById('botrixOverlayUrl');
         const status = document.getElementById('sevenTvStatus');
@@ -1447,9 +1288,9 @@
       // Popout Buttons
       document.getElementById('btnPopoutWindow').addEventListener('click', openRealPopoutWindow);
       document.getElementById('btnTopPopoutView').addEventListener('click', () => setInlinePopoutMode(true));
-      document.getElementById('btnInlinePopoutMode').addEventListener('click', () => setInlinePopoutMode(true));
+
       document.getElementById('btnExitPopoutView').addEventListener('click', () => setInlinePopoutMode(false));
-      document.getElementById('btnDownloadPopoutHtml').addEventListener('click', downloadStandalonePopoutHtml);
+
 
       // Quick Connect inside Popout Header
       const triggerQuickPopoutConnect = async () => {
@@ -1567,56 +1408,13 @@
         showToast('اتصال چت قطع شد.');
       });
 
-      // Clear Saved Channels
-      document.getElementById('btnClearSaved').addEventListener('click', () => {
-        try { localStorage.removeItem('kick_saved_channels_v2'); } catch (e) {}
-        renderSavedChannels();
-        showToast('لیست کانال‌ها به حالت پیش‌فرض بازنشانی شد.');
-      });
-
-      // Pause / Resume Auto-Scroll
-      const pauseBtn = document.getElementById('btnPauseScroll');
-      const resumeBanner = document.getElementById('scrollResumeBanner');
-      const setScrollPause = (paused) => {
-        isAutoScroll = !paused;
-        if (paused) {
-          pauseBtn.textContent = '▶️ ادامه اسکرول';
-          pauseBtn.classList.add('border-kick', 'text-kick');
-          resumeBanner.classList.remove('hidden');
-        } else {
-          pauseBtn.textContent = '⏸️ توقف اسکرول';
-          pauseBtn.classList.remove('border-kick', 'text-kick');
-          resumeBanner.classList.add('hidden');
-          const c = document.getElementById('chatMessagesContainer');
-          c.scrollTop = c.scrollHeight;
-        }
-      };
-      pauseBtn.addEventListener('click', () => setScrollPause(isAutoScroll));
-      document.getElementById('btnResumeScrollNow').addEventListener('click', () => setScrollPause(false));
-
-      // Clear Chat
-      document.getElementById('btnClearChat').addEventListener('click', () => {
-        messagesList = [];
-        messageTimestamps = [];
-        uniqueSenders.clear();
-        seenMessageIds.clear();
-        updateLiveStats();
-        const container = document.getElementById('chatMessagesContainer');
-        Array.from(container.children).forEach(ch => {
-          if (ch.id !== 'emptyStateBox') ch.remove();
-        });
-        document.getElementById('emptyStateBox').classList.remove('hidden');
-        showToast('صفحه چت پاکسازی شد.');
-      });
-
       // Unpin
       document.getElementById('btnUnpin').addEventListener('click', () => {
         document.getElementById('pinnedMessageBar').classList.add('hidden');
       });
 
       // Filter & Appearance Controls
-      document.getElementById('searchFilterInput').addEventListener('input', renderMessagesFeed);
-      document.getElementById('highlightInput').addEventListener('input', renderMessagesFeed);
+
       document.getElementById('chkShowTime').addEventListener('change', renderMessagesFeed);
       document.getElementById('chkShowBadges').addEventListener('change', renderMessagesFeed);
       document.getElementById('fontSizeRange').addEventListener('input', (e) => {
